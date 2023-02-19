@@ -1,0 +1,49 @@
+*ddc-source-nvim-obsidian.txt*            obsidian.nvim completion for ddc.vim
+
+==============================================================================
+CONTENTS                                   *ddc-source-nvim-obsidian-contents*
+
+Install                                     |ddc-source-nvim-obsidian-install|
+Example                                     |ddc-source-nvim-obsidian-example|
+Params                                       |ddc-source-nvim-obsidian-params|
+
+==============================================================================
+INSTALL                                     *ddc-source-nvim-obsidian-install*
+
+Install requirements.
+
+https://github.com/epwalsh/obsidian.nvim
+https://github.com/Shougo/ddc.vim
+https://github.com/vim-denops/denops.vim
+https://github.com/hrsh7th/vim-vsnip
+https://github.com/hrsh7th/vim-vsnip-integ
+
+==============================================================================
+EXAMPLE                                     *ddc-source-nvim-obsidian-example*
+>
+>
+        function! Obsidian() abort
+                call ddc#custom#patch_buffer('sources', ['nvim-obsidian'])
+                call ddc#custom#patch_buffer('sourceOptions', #{
+                      \ nvim-obsidian: #{
+                      \   mark: 'O',
+                      \ }})
+                call ddc#custom#patch_buffer('sourceParams', #{
+                      \ nvim-obsidian: #{
+                      \   dir: '~/vault',
+                      \ }})
+        endfunction
+
+        autocmd BufRead,BufNewFile ~/vault/**/*.md call Obsidian()
+<
+==============================================================================
+PARAMS                                       *ddc-source-nvim-obsidian-params*
+
+                                          *ddc-source-nvim-obsidian-param-dir*
+dir     string
+        vault directory.
+
+        Default: '~/vault'
+
+==============================================================================
+vim:tw=78:ts=8:noet:ft=help:norl:
