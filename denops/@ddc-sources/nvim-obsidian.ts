@@ -29,7 +29,7 @@ export class Source extends BaseSource<Params> {
     >,
   ): Promise<DdcGatherItems> {
     const searchWord = this.findSearchWord(context.input);
-    if (searchWord != null && searchWord.length == 0) {
+    if (searchWord == null || searchWord.length == 0) {
       return [];
     }
 
