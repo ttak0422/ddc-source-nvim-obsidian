@@ -4,17 +4,13 @@ import {
   Item,
 } from "../obsidian/deps/ddc/types.ts";
 import { GatherArguments } from "../obsidian/deps/ddc/sources.ts";
-import {
-  findNoteCandidate,
-  makeLspCompleteItem,
-} from "../obsidian/complete.ts";
+import { CompletionItem, findNoteCandidate } from "../obsidian/complete.ts";
 
 type Params = {
   dir: string;
 };
-type Note = {
+type NewNote = {
   id?: string;
-  option?: string;
 };
 
 export class Source extends BaseSource<Params> {
@@ -25,8 +21,8 @@ export class Source extends BaseSource<Params> {
       Params
     >,
   ): Promise<DdcGatherItems> {
-    const search = findNoteCandidate(context.input);
-    if (search == null || search.length == 0) {
+    const candicate = findNoteCandidate(context.input);
+    if (candicate == null || candicate.length == 0) {
       return [];
     }
 
@@ -35,7 +31,7 @@ export class Source extends BaseSource<Params> {
 
     const [payload] = await Promise.all([
       onCallback(id) as Promise<{
-        items?: Note[];
+        item?: NewNote[];
       }>,
       denops.call(
         "luaeval",
@@ -45,29 +41,30 @@ export class Source extends BaseSource<Params> {
             opts: {
               dir: sourceParams.dir,
             },
-            search,
+            note: candicate,
           },
           id,
         },
       ),
     ]);
 
-    if (payload?.items?.length == null) {
+    if (payload?.item == null) {
       return [];
     }
 
-    const items: Item[] = payload.items
+    const item: Item[] = payload.items
       .filter((note) => note.id && note.option)
       .map((note) =>
-        this.makeDdcCompleteItem(
+        this.makeCompletionItem(
           note,
           context.lineNr - 1,
           completePos,
         )
       );
+    const item = this.makeCompletionItem
 
     return {
-      items,
+      items: [item],
       isIncomplete: false,
     };
   }
@@ -78,26 +75,46 @@ export class Source extends BaseSource<Params> {
     };
   }
 
-  private makeDdcCompleteItem(
+  /**
+   * create ddc item.
+   *
+   * @param note - note
+   * @param lineNumber - line number (0-indexed)
+   * @param completePos - complete position
+   */
+  private makeCompletionItem(
     note: Note,
-    lineNumber: number, // 0-indexed
+    lineNumber: number,
     completePos: number,
   ): Item {
     const visual = "[[" + note.option + "]]";
     const content = note.id + "|" + note.option;
     const text = "[[" + content + "]]";
-    const lspCmpItem = makeLspCompleteItem(
-      text,
-      visual,
-      lineNumber,
-      completePos,
-    );
+    const cmpItem: CompletionItem = {
+      label: text,
+      sortText: visual,
+      textEdit: {
+        newText: text,
+        range: {
+          start: {
+            line: lineNumber,
+            character: completePos - 2,
+          },
+          end: {
+            line: lineNumber,
+            character: completePos + text.length,
+          },
+        },
+      },
+    };
+
     return {
       word: text,
       abbr: content,
       user_data: {
-        lspitem: JSON.stringify(lspCmpItem),
+        lspitem: JSON.stringify(cmpItem),
       },
     };
   }
 }
+

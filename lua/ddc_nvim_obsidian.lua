@@ -35,6 +35,21 @@ local request_items = function(arguments, id)
   } })
 end
 
+local publish_id = function(arguments, id)
+  local opts = config.ClientOpts.normalize(arguments.opts)
+  local client = obsidian.new(opts)
+  vim.api.nvim_call_function("ddc#callback", { id, {
+    id = client:new_note_id(arguments.title),
+  } })
+end
+
+local create_note = function(arguments, id)
+  local client = obsidian.new(arguments.opts)
+  client:new_note(arguments.title, arguments.id, vim.fn.expand("%:p:h"))
+end
+
 return {
   request_items = request_items,
+  publish_id = publish_id,
+  create_note = create_note,
 }
