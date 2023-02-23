@@ -37,13 +37,28 @@ end
 
 local publish_id = function(arguments, id)
   local opts = config.ClientOpts.normalize(arguments.opts)
+
+  -- TODO: support setup
+  -- https://github.com/epwalsh/obsidian.nvim/blob/main/README.md
+  opts.note_id_func = function(title)
+    local suffix = ""
+    if title ~= nil then
+      suffix = title:gsub(" ", "-"):gsub("[^A-Za-z0-9-]", ""):lower()
+    else
+      for _ = 1, 4 do
+        suffix = suffix .. string.char(math.random(65, 90))
+      end
+    end
+    return tostring(os.time()) .. "-" .. suffix
+  end
+
   local client = obsidian.new(opts)
   vim.api.nvim_call_function("ddc#callback", { id, {
     id = client:new_note_id(arguments.title),
   } })
 end
 
-local create_note = function(arguments, id)
+local create_note = function(arguments)
   local client = obsidian.new(arguments.opts)
   client:new_note(arguments.title, arguments.id, vim.fn.expand("%:p:h"))
 end

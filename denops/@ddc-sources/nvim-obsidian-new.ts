@@ -50,10 +50,8 @@ export class Source extends BaseSource<Params> {
         "require('ddc_nvim_obsidian').publish_id(_A.arguments, _A.id)",
         {
           arguments: {
-            opts: {
-              dir: sourceParams.dir,
-            },
-            note: title,
+            opts: this.makeObsidianOpts(sourceParams),
+            title,
           },
           id,
         },
@@ -88,22 +86,25 @@ export class Source extends BaseSource<Params> {
       ObsidianNewUserData
     >,
   ): Promise<void> {
-    this.counter = (this.counter + 1) % 100;
-    const id = "source/" + this.name + "/" + this.counter;
     return denops.call(
       "luaeval",
       "require('ddc_nvim_obsidian').create_note(_A.arguments, _A.id)",
       {
         arguments: {
-          opts: {
-            dir: sourceParams.dir,
-          },
+          opts: this.makeObsidianOpts(sourceParams),
           id: userData.noteId,
           title: userData.noteTitle,
         },
-        id,
       },
     ) as Promise<void>;
+  }
+
+  private makeObsidianOpts(
+    params: Params,
+  ) {
+    return {
+      dir: params.dir,
+    };
   }
 
   private makeDdcCompletionItem(
