@@ -2,16 +2,13 @@ import {
   BaseSource,
   DdcGatherItems,
   Item,
-} from "https://deno.land/x/ddc_vim@v3.2.0/types.ts";
+} from "../obsidian/deps/ddc/types.ts";
+import { GatherArguments } from "../obsidian/deps/ddc/sources.ts";
 import {
-  GatherArguments,
-} from "https://deno.land/x/ddc_vim@v3.2.0/base/source.ts";
-import {
-  CompletionItem as LspCompletionItem,
-  TextEdit,
-} from "https://deno.land/x/vscode_languageserver_types@v0.1.0/mod.ts";
+  findNoteCandidate,
+  makeLspCompleteItem,
+} from "../obsidian/complete.ts";
 
-type CompletionItem = LspCompletionItem & { textEdit: NonNullable<TextEdit> };
 type Params = {
   dir: string;
 };
@@ -28,8 +25,8 @@ export class Source extends BaseSource<Params> {
       Params
     >,
   ): Promise<DdcGatherItems> {
-    const searchWord = this.findSearchWord(context.input);
-    if (searchWord == null || searchWord.length == 0) {
+    const search = findNoteCandidate(context.input);
+    if (search == null || search.length == 0) {
       return [];
     }
 
@@ -48,7 +45,7 @@ export class Source extends BaseSource<Params> {
             opts: {
               dir: sourceParams.dir,
             },
-            search: searchWord,
+            search,
           },
           id,
         },
@@ -62,7 +59,7 @@ export class Source extends BaseSource<Params> {
     const items: Item[] = payload.items
       .filter((note) => note.id && note.option)
       .map((note) =>
-        this.makeCompletionItem(
+        this.makeDdcCompleteItem(
           note,
           context.lineNr - 1,
           completePos,
@@ -81,52 +78,25 @@ export class Source extends BaseSource<Params> {
     };
   }
 
-  private findSearchWord(input: string): string | null {
-    const nearestBracketsIdx = input.lastIndexOf("[[");
-    if (nearestBracketsIdx < 0) {
-      return null;
-    }
-    return input.substring(nearestBracketsIdx + 2);
-  }
-
-  /**
-   * create ddc item.
-   *
-   * @param note - note
-   * @param lineNumber - line number (0-indexed)
-   * @param completePos - complete position
-   */
-  private makeCompletionItem(
+  private makeDdcCompleteItem(
     note: Note,
-    lineNumber: number,
+    lineNumber: number, // 0-indexed
     completePos: number,
   ): Item {
     const visual = "[[" + note.option + "]]";
     const content = note.id + "|" + note.option;
     const text = "[[" + content + "]]";
-    const cmpItem: CompletionItem = {
-      label: text,
-      sortText: visual,
-      textEdit: {
-        newText: text,
-        range: {
-          start: {
-            line: lineNumber,
-            character: completePos - 2,
-          },
-          end: {
-            line: lineNumber,
-            character: completePos + text.length,
-          },
-        },
-      },
-    };
-
+    const lspCmpItem = makeLspCompleteItem(
+      text,
+      visual,
+      lineNumber,
+      completePos,
+    );
     return {
       word: text,
       abbr: content,
       user_data: {
-        lspitem: JSON.stringify(cmpItem),
+        lspitem: JSON.stringify(lspCmpItem),
       },
     };
   }
