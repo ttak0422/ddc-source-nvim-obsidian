@@ -12,16 +12,26 @@ obsidian.nvim completion for ddc.vim.
 ## Configuration
 
 ```vim
+call ddc#custom#patch_global('sourceOptions', #{
+        \ nvim-obsidian: #{
+        \   mark: 'O',
+        \ },
+        \ nvim-obsidian-new: #{
+        \   mark: 'O+',
+        \ }})
+call ddc#custom#patch_global('sourceParams', #{
+        \ nvim-obsidian: #{
+        \   dir: '~/vault',
+        \ },
+        \ nvim-obsidian-new: #{
+        \   dir: '~/vault',
+        \ }})
+
 function! Obsidian() abort
-        call ddc#custom#patch_buffer('sources', ['nvim-obsidian'])
-        call ddc#custom#patch_buffer('sourceOptions', #{
-              \ nvim-obsidian: #{
-              \   mark: 'O',
-              \ }})
-        call ddc#custom#patch_buffer('sourceParams', #{
-              \ nvim-obsidian: #{
-              \   dir: '~/vault',
-              \ }})
+        call ddc#custom#patch_buffer('sources', [
+        \   'nvim-obsidian',
+        \   'nvim-obsidian-new',
+        \ ])
 endfunction
 
 autocmd BufRead,BufNewFile ~/vault/**/*.md call Obsidian()

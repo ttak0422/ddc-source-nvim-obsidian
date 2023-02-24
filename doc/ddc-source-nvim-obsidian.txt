@@ -20,18 +20,35 @@ https://github.com/hrsh7th/vim-vsnip-integ
 
 ==============================================================================
 EXAMPLE                                     *ddc-source-nvim-obsidian-example*
+
+'nvim-obsidian' provides note completion.
+
+'nvim-obsidian-new' provides note completion that generates it on complete
+done.
+
+
 >
->
+        call ddc#custom#patch_global('sourceOptions', #{
+              \ nvim-obsidian: #{
+              \   mark: 'O',
+              \ },
+              \ nvim-obsidian-new: #{
+              \   mark: 'O+',
+              \ },
+        })
+        call ddc#custom#patch_global('sourceParams', #{
+              \ nvim-obsidian: #{
+              \   dir: '~/vault',
+              \ },
+              \ nvim-obsidian-new: #{
+              \   dir: '~/vault',
+        \ }})
+
         function! Obsidian() abort
-                call ddc#custom#patch_buffer('sources', ['nvim-obsidian'])
-                call ddc#custom#patch_buffer('sourceOptions', #{
-                      \ nvim-obsidian: #{
-                      \   mark: 'O',
-                      \ }})
-                call ddc#custom#patch_buffer('sourceParams', #{
-                      \ nvim-obsidian: #{
-                      \   dir: '~/vault',
-                      \ }})
+                call ddc#custom#patch_buffer('sources', [
+                \   'nvim-obsidian',
+                \   'nvim-obsidian-new',
+        \ ])
         endfunction
 
         autocmd BufRead,BufNewFile ~/vault/**/*.md call Obsidian()
@@ -40,6 +57,13 @@ EXAMPLE                                     *ddc-source-nvim-obsidian-example*
 PARAMS                                       *ddc-source-nvim-obsidian-params*
 
                                           *ddc-source-nvim-obsidian-param-dir*
+dir     string
+        vault directory.
+
+        Default: '~/vault'
+
+
+                                      *ddc-source-nvim-obsidian-new-param-dir*
 dir     string
         vault directory.
 
