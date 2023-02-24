@@ -57,13 +57,20 @@ export class Source extends BaseSource<Params> {
     }
 
     const items: Item[] = payload.items
-      .filter((note) => note.id && note.option)
+      .filter((note) => note.id)
       .map((note) =>
-        this.makeDdcCompleteItem(
-          note,
-          context.lineNr - 1,
-          completePos,
-        )
+        note.option
+          ? this.makeAliasedItem(
+            note.id!,
+            note.option!,
+            context.lineNr - 1,
+            completePos,
+          )
+          : this.makeIdItem(
+            note.id!,
+            context.lineNr - 1,
+            completePos,
+          )
       );
 
     return {
@@ -78,13 +85,36 @@ export class Source extends BaseSource<Params> {
     };
   }
 
-  private makeDdcCompleteItem(
-    note: Note,
+  private makeIdItem(
+    noteId: string,
     lineNumber: number, // 0-indexed
     completePos: number,
   ): Item {
-    const visual = "[[" + note.option + "]]";
-    const content = note.id + "|" + note.option;
+    const visual = "[[" + noteId + "]]";
+    const text = "[[" + noteId + "]]";
+    const lspCmpItem = makeLspCompleteItem(
+      text,
+      visual,
+      lineNumber,
+      completePos,
+    );
+    return {
+      word: text,
+      abbr: noteId,
+      user_data: {
+        lspitem: JSON.stringify(lspCmpItem),
+      },
+    };
+  }
+
+  private makeAliasedItem(
+    noteId: string,
+    alias: string,
+    lineNumber: number, // 0-indexed
+    completePos: number,
+  ): Item {
+    const visual = "[[" + noteId + "]]";
+    const content = noteId + "|" + alias;
     const text = "[[" + content + "]]";
     const lspCmpItem = makeLspCompleteItem(
       text,

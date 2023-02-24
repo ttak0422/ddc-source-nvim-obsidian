@@ -8,6 +8,10 @@ local request_items = function(arguments, id)
 
   local items = {}
   for note in client:search(arguments.search, "--ignore-case") do
+    -- id only
+    table.insert(items, {
+      id = note.id,
+    })
     for _, alias in pairs(note.aliases) do
       local options = {}
       local alias_case_matched = util.match_case(arguments.search, alias)
@@ -22,6 +26,7 @@ local request_items = function(arguments, id)
       table.insert(options, alias)
 
       for _, option in pairs(options) do
+        -- id + alias
         table.insert(items, {
           id = note.id,
           option = option,
