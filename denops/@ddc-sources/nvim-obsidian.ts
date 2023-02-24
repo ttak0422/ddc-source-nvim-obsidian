@@ -90,11 +90,10 @@ export class Source extends BaseSource<Params> {
     lineNumber: number, // 0-indexed
     completePos: number,
   ): Item {
-    const visual = "[[" + noteId + "]]";
     const text = "[[" + noteId + "]]";
     const lspCmpItem = makeLspCompleteItem(
       text,
-      visual,
+      text,
       lineNumber,
       completePos,
     );
