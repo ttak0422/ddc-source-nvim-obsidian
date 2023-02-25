@@ -12,13 +12,14 @@ local request_items = function(arguments, id)
     table.insert(items, {
       id = note.id,
     })
-    for _, alias in pairs(note.aliases) do
+    local aliases = note.aliases or {}
+    for _, alias in pairs(aliases) do
       local options = {}
       local alias_case_matched = util.match_case(arguments.search, alias)
       if
         alias_case_matched ~= nil
         and alias_case_matched ~= alias
-        and not util.contains(note.aliases, alias_case_matched)
+        and not util.contains(aliases, alias_case_matched)
       then
         table.insert(options, alias_case_matched)
       end
