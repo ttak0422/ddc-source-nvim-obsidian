@@ -2,7 +2,12 @@ local obsidian = require("obsidian")
 local config = require("obsidian.config")
 local util = require("obsidian.util")
 
-local request_items = function(arguments, id)
+local M = {}
+
+--- search from vault.
+---@param arguments { opts: { dir: string }, search: string } obsidian search request
+---@param id string ddc callback id
+M.request_items = function(arguments, id)
   local opts = config.ClientOpts.normalize(arguments.opts)
   local client = obsidian.new(opts)
 
@@ -41,7 +46,10 @@ local request_items = function(arguments, id)
   } })
 end
 
-local publish_id = function(arguments, id)
+--- publish note id.
+---@param arguments { opts: { dir: string }, title: string } obsidian request
+---@param id string ddc callback id
+M.publish_id = function(arguments, id)
   local opts = config.ClientOpts.normalize(arguments.opts)
 
   -- TODO: support setup
@@ -64,13 +72,11 @@ local publish_id = function(arguments, id)
   } })
 end
 
-local create_note = function(arguments)
+--- create new note.
+---@param arguments { opts: { dir: string }, title: string, id: string } obsidian request
+M.create_note = function(arguments)
   local client = obsidian.new(arguments.opts)
   client:new_note(arguments.title, arguments.id, vim.fn.expand("%:p:h"))
 end
 
-return {
-  request_items = request_items,
-  publish_id = publish_id,
-  create_note = create_note,
-}
+return M

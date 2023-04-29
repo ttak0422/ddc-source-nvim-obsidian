@@ -1,9 +1,4 @@
-import {
-  BaseSource,
-  DdcGatherItems,
-  Item,
-} from "../obsidian/deps/ddc/types.ts";
-import { GatherArguments } from "../obsidian/deps/ddc/sources.ts";
+import { BaseSource, DdcGatherItems, GatherArguments, Item } from "../deps.ts";
 import {
   findNoteCandidate,
   makeLspCompleteItem,
@@ -13,8 +8,11 @@ type Params = {
   dir: string;
 };
 type Note = {
-  id?: string;
+  id: string;
   option?: string;
+};
+type ObsidianUserData = {
+  lspitem: string;
 };
 
 export class Source extends BaseSource<Params> {
@@ -24,7 +22,7 @@ export class Source extends BaseSource<Params> {
     { denops, sourceParams, completePos, context, onCallback }: GatherArguments<
       Params
     >,
-  ): Promise<DdcGatherItems> {
+  ): Promise<DdcGatherItems<ObsidianUserData>> {
     const search = findNoteCandidate(context.input);
     if (search == null || search.length == 0) {
       return [];
@@ -35,7 +33,7 @@ export class Source extends BaseSource<Params> {
 
     const [payload] = await Promise.all([
       onCallback(id) as Promise<{
-        items?: Note[];
+        items?: Partial<Note>[];
       }>,
       denops.call(
         "luaeval",
@@ -55,19 +53,18 @@ export class Source extends BaseSource<Params> {
     if (payload?.items?.length == null) {
       return [];
     }
-
-    const items: Item[] = payload.items
-      .filter((note) => note.id)
+    const items: Item<ObsidianUserData>[] = (payload.items ?? [])
+      .filter((note): note is Note => !!note.id)
       .map((note) =>
         note.option
           ? this.makeAliasedItem(
-            note.id!,
-            note.option!,
+            note.id,
+            note.option,
             context.lineNr - 1,
             completePos,
           )
           : this.makeIdItem(
-            note.id!,
+            note.id,
             context.lineNr - 1,
             completePos,
           )
@@ -89,7 +86,7 @@ export class Source extends BaseSource<Params> {
     noteId: string,
     lineNumber: number, // 0-indexed
     completePos: number,
-  ): Item {
+  ): Item<ObsidianUserData> {
     const text = "[[" + noteId + "]]";
     const lspCmpItem = makeLspCompleteItem(
       text,
@@ -111,7 +108,7 @@ export class Source extends BaseSource<Params> {
     alias: string,
     lineNumber: number, // 0-indexed
     completePos: number,
-  ): Item {
+  ): Item<ObsidianUserData> {
     const visual = "[[" + noteId + "]]";
     const content = noteId + "|" + alias;
     const text = "[[" + content + "]]";
