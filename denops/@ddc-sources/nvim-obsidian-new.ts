@@ -1,12 +1,10 @@
 import {
   BaseSource,
   DdcGatherItems,
-  Item,
-} from "../obsidian/deps/ddc/types.ts";
-import {
   GatherArguments,
+  Item,
   OnCompleteDoneArguments,
-} from "../obsidian/deps/ddc/sources.ts";
+} from "../deps.ts";
 import {
   findNoteCandidate,
   makeLspCompleteItem,

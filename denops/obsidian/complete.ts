@@ -1,8 +1,8 @@
-import { assertEquals } from "https://deno.land/x/ddc_vim@v3.2.0/deps.ts";
 import {
+  assertEquals,
   CompletionItem as LspCompletionItem,
   TextEdit,
-} from "./deps/vscode_lsp.ts";
+} from "../deps.ts";
 
 export type CompletionItem = LspCompletionItem & {
   textEdit: NonNullable<TextEdit>;
@@ -23,7 +23,7 @@ export function findNoteCandidate(input: string): string | undefined {
  * @param sortText - the value to be used for comparison
  * @param lineNumber - line number (0-indexed)
  * @param completePos - complete position
- * @returns [TODO:return]
+ * @returns Lsp completion item
  */
 export function makeLspCompleteItem(
   text: string,
