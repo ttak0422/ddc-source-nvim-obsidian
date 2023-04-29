@@ -1,4 +1,4 @@
-# ddc-source-nvim-obsidian
+# ddc-source-nvim-obsidian [![Deno](https://github.com/ttak0422/ddc-source-nvim-obsidian/actions/workflows/deno.yml/badge.svg)](https://github.com/ttak0422/ddc-source-nvim-obsidian/actions/workflows/deno.yml)
 
 obsidian.nvim completion for ddc.vim.
 
